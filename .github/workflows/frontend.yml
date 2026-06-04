@@ -1,0 +1,91 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [dev, uat, prod]
+  pull_request:
+    branches: [dev, uat, prod]
+  workflow_dispatch:
+
+jobs:
+
+  ci:
+    name: Typecheck + build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  # ── Deploy DEV ────────────────────────────────────────────────────────────
+  deploy-dev:
+    name: Deploy → dev
+    needs: ci
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+      url: https://statelume-dev.fly.dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to dev
+        run: flyctl deploy --config fly.dev.toml --app statelume-dev --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}
+
+  # ── Deploy UAT ────────────────────────────────────────────────────────────
+  deploy-uat:
+    name: Deploy → UAT
+    needs: ci
+    if: github.ref == 'refs/heads/uat' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: uat
+      url: https://statelume-uat.fly.dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to UAT
+        run: flyctl deploy --config fly.uat.toml --app statelume-uat --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_UAT }}
+
+  # ── Deploy PROD ───────────────────────────────────────────────────────────
+  deploy-prod:
+    name: Deploy → prod
+    needs: ci
+    if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://statelume-prod.fly.dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to prod
+        run: flyctl deploy --config fly.prod.toml --app statelume-prod --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_PROD }}
