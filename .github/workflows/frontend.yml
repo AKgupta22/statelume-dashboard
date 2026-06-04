@@ -1,0 +1,59 @@
+# ── Deploy DEV ────────────────────────────────────────────────────────────
+  deploy-dev:
+    name: Deploy → dev
+    needs: ci
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+      url: https://statelume-dev.fly.dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to dev
+        working-directory: frontend
+        run: flyctl deploy --config fly.dev.toml --app statelume-dev --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEV }}
+
+  # ── Deploy UAT ────────────────────────────────────────────────────────────
+  deploy-uat:
+    name: Deploy → UAT
+    needs: ci
+    if: github.ref == 'refs/heads/uat' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: uat
+      url: https://statelume-uat.fly.dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to UAT
+        working-directory: frontend
+        run: flyctl deploy --config fly.uat.toml --app statelume-uat --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_UAT }}
+
+  # ── Deploy PROD ───────────────────────────────────────────────────────────
+  deploy-prod:
+    name: Deploy → prod
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://statelume-prod.fly.dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to prod
+        working-directory: frontend
+        run: flyctl deploy --config fly.prod.toml --app statelume-prod --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_PROD }}
