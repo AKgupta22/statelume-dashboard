@@ -1,0 +1,11 @@
+cat > .dockerignore << 'EOF'
+node_modules
+.next
+.env*
+!.env.example
+.git
+README.md
+Dockerfile
+.dockerignore
+npm-debug.log
+EOFs
