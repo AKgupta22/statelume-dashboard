@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: dev
-      url: https://statelume-dev.fly.dev
+      url: https://dev.statelume.com
 
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: uat
-      url: https://statelume-uat.fly.dev
+      url: https://uat.statelume.com
 
     steps:
       - uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: prod
-      url: https://statelume-prod.fly.dev
+      url: https://statelume.com
 
     steps:
       - uses: actions/checkout@v4
